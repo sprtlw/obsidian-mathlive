@@ -1,3 +1,5 @@
+import { log } from "console";
+import { request } from "http";
 import { MathfieldElement } from "mathlive";
 import { App, Editor, MarkdownView, Modal, Notice, Plugin } from "obsidian";
 import { MarkdownFileInfo } from "obsidian";
@@ -12,7 +14,7 @@ interface PluginSettings {
 const DEFAULT_SETTINGS = {
 	apiKey: null,
 	useCustomHostInference: false,
-	customHostURL: "http://localhost:8050",
+	customHostURL: "http://localhost:8052",
 };
 
 export default class MathLivePlugin extends Plugin {
@@ -362,7 +364,7 @@ class MathLiveModal extends Modal {
 		const formData = new FormData();
 		formData.append("file", imageData);
 
-		let res;
+		let res = null;
 
 		if (!this.plugin.settings.useCustomHostInference) {
 			res = await fetch(address + "/predict/", {
