@@ -12,7 +12,7 @@ interface PluginSettings {
 const DEFAULT_SETTINGS = {
 	apiKey: null,
 	useCustomHostInference: false,
-	customHostURL: null,
+	customHostURL: "http://localhost:8050",
 };
 
 export default class MathLivePlugin extends Plugin {
@@ -319,8 +319,13 @@ class MathLiveModal extends Modal {
 	}
 
 	async onImageScanRequest() {
-		if (!this.plugin.settings.apiKey) {
-			new Notice("Please open plugin settings to create API key.");
+		if (
+			!this.plugin.settings.apiKey &&
+			!this.plugin.settings.useCustomHostInference
+		) {
+			new Notice(
+				"Please open plugin settings to create API key or set custom host."
+			);
 			return;
 		}
 		try {
@@ -357,13 +362,23 @@ class MathLiveModal extends Modal {
 		const formData = new FormData();
 		formData.append("file", imageData);
 
-		const res = await fetch(address + "/predict/", {
-			headers: {
-				"Api-key": this.plugin.settings.apiKey,
-			},
-			method: "POST",
-			body: formData,
-		});
+		let res;
+
+		if (!this.plugin.settings.useCustomHostInference) {
+			res = await fetch(address + "/predict/", {
+				headers: {
+					"Api-key": this.plugin.settings.apiKey,
+				},
+				method: "POST",
+				body: formData,
+			});
+		} else {
+			res = await fetch(address + "/predict/", {
+				method: "POST",
+				body: formData,
+			});
+		}
+
 		return await res.json();
 	}
 
